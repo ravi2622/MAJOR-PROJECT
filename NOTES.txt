@@ -1,0 +1,66 @@
+1. Getting Started :=
+------------------
+
+=> Database Set Up
+
+=> REST Apis for CRUD
+
+--> MODEL : Listing --> place
+
+    1. title
+    2. description
+    3. image
+    4. price
+    5. location
+    6. country
+
+2. ROUTES :=
+--------- 
+
+-> index Route
+
+    GET     /Listings -> all Listings
+
+-> new Route
+
+    GET     /Listings/new -> form
+
+    POST    /Listings -> add new List
+
+-> Update Route: Edit & Update Route
+
+    GET     /Listings/:id/edit  ->  edit form
+                                        |-> submit
+
+    put     /Listings/:id
+
+3. what is the EJS mate :=
+-----------------------
+
+Run node app.js from examples and open localhost:3000 to see a working example.
+
+Given a template, index.ejs:
+
+<% layout('boilerplate') -%>
+<h1>I am the <%= what %> template</h1>
+And a layout, boilerplate.ejs:
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>It's <%= who %></title>
+  </head>
+  <body>    
+    <section>
+      <%- body -%>
+    </section>
+  </body>
+</html>
+
+Note:-
+----
+==> static files for the css
+
+4. creating nav bar :=
+-------------------
+

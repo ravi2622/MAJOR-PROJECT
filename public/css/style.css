@@ -1,0 +1,178 @@
+body {
+    font-family: "Plus Jakarta Sans", sans-serif !important;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.container {
+    flex: 1;
+}
+
+/* navbar */
+
+.navbar {
+    height: 5rem;
+    background-color: white;
+}
+
+.fa-compass {
+    font-size: 2rem;
+    transition: color 100ms linear 100ms;
+}
+
+.fa-compass:hover {
+    color: #fe424d;
+}
+
+.nav-link {
+    color: #222222 !important;
+}
+
+.underline-slide {
+    position: relative;
+    display: inline-block;
+}
+
+.underline-slide::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 2px;
+    bottom: 0;
+    left: 0;
+    background-color: black;
+    transform: scaleX(0);
+    transform-origin: bottom right;
+    transition: transform 0.5s ease;
+}
+
+.underline-slide:hover::after {
+    transform: scaleX(1);
+    transform-origin: bottom left;
+}
+
+/* footer */
+
+.f-info {
+    height: 8rem;
+    background-color: #ebebeb;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    text-align: center;
+}
+
+.f-info-links a {
+    text-decoration: none;
+    color: #222222;
+    margin-right: 1rem;
+}
+
+.f-info-links a:hover {
+    text-decoration: underline;
+}
+
+.f-info-links,
+.f-info-socials,
+.f-info-brand {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.f-info-socials i {
+    margin-right: 1rem;
+    font-size: 1.2rem;
+    cursor: pointer;
+}
+
+/* Card */
+
+.card {
+    border: none !important;
+    margin-bottom: 2rem;
+}
+
+.containcard {
+    margin: 0 2rem 0 2rem !important;
+}
+
+@media (max-width: 573px) {
+    .row {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+}
+
+.card-img-top {
+    border-radius: 1rem !important;
+    width: 100% !important;
+    object-fit: cover !important;
+}
+
+.card-body {
+    padding: 0 !important;
+}
+
+.card-text p {
+    font-weight: 400 !important;
+}
+
+.listing-link {
+    text-decoration: none;
+    color: #222222;
+}
+
+.listing-link:hover {
+    color: #222222;
+}
+
+.card-img-overlay {
+    opacity: 0;
+    transition: opacity 100ms linear 100ms;
+    height: 20rem;
+}
+
+.card-img-overlay:hover {
+    opacity: 0.5;
+    color: #222222 !important;
+    background-color: white;
+}
+
+.card-img-overlay:hover~.card-body {
+    display: none;
+}
+
+/* new-page */
+
+.add-btn {
+    background-color: #fe424d !important;
+    border: none !important;
+}
+
+/* edit-page */
+
+.edit-btn {
+    background-color: #fe424d !important;
+    border: none !important;
+}
+
+/* show-page */
+
+.show-img {
+    height: 30vh;
+    /* object-fit: cover !important; */
+}
+
+.btns {
+    display: flex;
+}
+
+.show-card {
+    padding-left: 0;
+    padding-right: 0;
+}
