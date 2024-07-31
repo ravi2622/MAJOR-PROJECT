@@ -5,38 +5,60 @@
             <div class="col-8">
                 <br><br>
                 <h3>Edit a List</h3>
-                <form action="/listings/<%= listing.id %>/?_method=PUT" method="post">
+                <form action="/listings/<%= listing.id %>/?_method=PUT" method="post" class="needs-validation" novalidate>
                     <div class="mb-3">
                         <label for="title" class="form-label">Edit Title</label>
-                        <input type="text" class="form-control" name="listing[title]" value="<%= listing.title %>">
+                        <input type="text" class="form-control" name="listing[title]" value="<%= listing.title %>"
+                            required>
+                        <div class="invalid-feedback">
+                            Please Enter Title
+                        </div>
                     </div>
 
                     <div class="mb-3">
                         <label for="description" class="form-label">Edit Description</label>
-                        <textarea type="text" class="form-control"
-                            name="listing[description]"><%= listing.description %></textarea>
+                        <textarea type="text" class="form-control" name="listing[description]"
+                            required><%= listing.description %></textarea>
+                        <div class="invalid-feedback">
+                            Please Enter Discripstion
+                        </div>
                     </div>
 
                     <div class="mb-3">
                         <label for="image" class="form-label">Edit Image-Link</label>
-                        <input type="text" class="form-control" name="listing[image]" value="<%= listing.image %>">
+                        <input type="text" class="form-control" name="listing[image]" value="<%= listing.image %>"
+                            required>
+                            <div class="invalid-feedback">
+                                Please Enter valid Image-Link
+                            </div>
                     </div>
 
                     <div class="row">
-                            <div class="mb-3 col-md-4">
-                                <label for="price" class="form-label">Edit Price</label>
-                                <input type="number" class="form-control" name="listing[price]"
-                                    value="<%= listing.price %>">
-                            </div>
-                            <div class="mb-3 col-md-8">
-                                <label for="location" class="form-label">Edit Location</label>
-                                <input type="text" class="form-control" name="listing[location]" value="<%= listing.location %>">
-                            </div>
+                        <div class="mb-3 col-md-4">
+                            <label for="price" class="form-label">Edit Price</label>
+                            <input type="number" class="form-control" name="listing[price]" value="<%= listing.price %>"
+                                required>
+                                <div class="invalid-feedback">
+                                    Please Enter Price
+                                </div>
+                        </div>
+                        <div class="mb-3 col-md-8">
+                            <label for="location" class="form-label">Edit Location</label>
+                            <input type="text" class="form-control" name="listing[location]"
+                                value="<%= listing.location %>" required>
+                                <div class="invalid-feedback">
+                                    Please Enter Location
+                                </div>
+                        </div>
                     </div>
 
                     <div class="mb-3">
                         <label for="country" class="form-label">Edit Country</label>
-                        <input type="text" class="form-control" name="listing[country]" value="<%= listing.country %>">
+                        <input type="text" class="form-control" name="listing[country]" value="<%= listing.country %>"
+                            required>
+                            <div class="invalid-feedback">
+                                Please Enter Country
+                            </div>
                     </div>
                     <br>
                     <br>

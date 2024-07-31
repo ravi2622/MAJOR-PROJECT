@@ -5,6 +5,9 @@ let path = require("path");
 const methodOverride = require("method-override");
 const Listing = require("./models/listing.js");
 const ejsMate = require("ejs-mate");
+const wrapAsync = require("./utils/wrapAsync.js");
+const ExpressError = require("./utils/ExpressError.js");
+const { listSchema } = require("./schema.js");
 
 const mongoose = require('mongoose');
 
@@ -29,6 +32,18 @@ app.listen(port, (req, res) => {
     console.log(`The port will be listune at port - '${port}'`);
 });
 
+const validatelisting = (req, res, next) => {
+    let { error } = listSchema.validate(req.body);
+    console.log(error);
+    if (error) {
+        let errMsg = error.details.map((el) => el.message).join(",");
+        throw new ExpressError(400, errMsg);
+    }
+    else {
+        next();
+    }
+};
+
 app.get("/", (req, res) => {
     res.send("welcome to the wanderlust :)");
 });
@@ -49,16 +64,16 @@ app.get("/", (req, res) => {
 //     res.send(testing);
 // });
 
-app.get("/listings", async (req, res) => {
+app.get("/listings", wrapAsync(async (req, res, next) => {
     let allListings = await Listing.find();
     res.render("./listings/index.ejs", { allListings });
-});
+}));
 
-app.get("/listings/new", async (req, res) => {
+app.get("/listings/new", wrapAsync(async (req, res) => {
     res.render("./listings/new.ejs");
-});
+}));
 
-app.post("/listings", async (req, res) => {
+app.post("/listings", validatelisting, wrapAsync(async (req, res, next) => {
 
     // let {title, description, image, price, location, country} = req.body;
     // let newListing = new Listing({
@@ -73,7 +88,33 @@ app.post("/listings", async (req, res) => {
     //     country: country,
     // });
 
+    // if (!req.body.listing) {
+    //     throw new ExpressError(400, "Send valid data for listing");
+    // }
+
+    // let result = listSchema.validate(req.body);
+    // console.log(result);
+    // if(result.error) {
+    //     throw new ExpressError(400, result.error);
+    // }
+
     let newListing = new Listing(req.body.listing);
+
+    // if (!newListing.title) {
+    //     throw new ExpressError(400, "Title is missing!");
+    // }
+    // if (!newListing.description) {
+    //     throw new ExpressError(400, "description is missing!");
+    // }
+    // if (!newListing.price) {
+    //     throw new ExpressError(400, "price is missing!");
+    // }
+    // if (!newListing.location) {
+    //     throw new ExpressError(400, "location is missing!");
+    // }
+    // if (!newListing.country) {
+    //     throw new ExpressError(400, "country is missing!");
+    // }
 
     newListing.save().then(res => {
         console.log(res);
@@ -82,33 +123,52 @@ app.post("/listings", async (req, res) => {
     });
 
     res.redirect("listings");
-});
+}));
 
-app.get("/listings/:id/edit", async (req, res) => {
+app.get("/listings/:id/edit", wrapAsync(async (req, res) => {
     let { id } = req.params;
     let listing = await Listing.findById(id);
     console.log(listing);
     res.render("./listings/edit.ejs", { listing });
-});
+}));
 
-app.put("/listings/:id", async (req, res) => {
+app.put("/listings/:id", validatelisting, wrapAsync(async (req, res, next) => {
     let { id } = req.params;
     console.log(id);
+
+    // if (!req.body.listing) {
+    //     throw new ExpressError(400, "Send valid data for listing");
+    // }
+
     await Listing.findByIdAndUpdate(id, { ...req.body.listing });
     res.redirect(`/listings/${id}`);
-});
+}));
 
-app.get("/listings/:id", async (req, res) => {
+app.get("/listings/:id", wrapAsync(async (req, res) => {
     let { id } = req.params;
     console.log(id);
     const listing = await Listing.findById(id);
     console.log(listing);
     res.render("./listings/show.ejs", { listing });
-});
+}));
 
-app.delete("/listings/:id", async (req, res) => {
-    let {id} = req.params;
+app.delete("/listings/:id", wrapAsync(async (req, res) => {
+    let { id } = req.params;
     await Listing.findByIdAndDelete(id);
 
     res.redirect("/listings");
+}));
+
+app.all("*", (req, res, next) => {
+    console.log("new error!");
+    throw new ExpressError(404, "Page Not Found!");
+});
+
+app.use((err, req, res, next) => {
+    let { statusCode = 500, message = "something went wrong!" } = err;
+    console.log(err.message);
+
+    res.status(statusCode).render("errors.ejs", { err });
+
+    // res.status(statusCode).send(message);
 });

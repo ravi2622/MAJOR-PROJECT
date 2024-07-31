@@ -64,3 +64,124 @@ Note:-
 4. creating nav bar :=
 -------------------
 
+5. Form Validations := 
+-------------------
+
+=> When we enter data in the form, the browser and/or the web server will check to see that the data is in the correct formate and within the constrainsts set by the applicastion.
+
+6. Custom Error Handler :=
+-----------------------
+
+7. Error.ejs :=
+------------
+
+8. Validations for Schema :=
+-------------------------
+
+-> this method is to long and to lendhi when we enter any new data for the our web app this is not use full.
+
+        -----------------------------------------------------------------------
+        | app.post("/listings", wrapAsync(async (req, res, next) => {         |                                                              
+        |     if (!req.body.listing) {                                        |                                
+        |         throw new ExpressError(400, "Send valid data for listing"); |                                                                      
+        |     }                                                               |        
+        |                                                                     |    
+        |     let newListing = new Listing(req.body.listing);                 |                                                      
+        |                                                                     |    
+        |     if (!newListing.title) {                                        |                                
+        |         throw new ExpressError(400, "Title is missing!");           |                                                            
+        |     }                                                               |        
+        |     if (!newListing.description) {                                  |                                      
+        |         throw new ExpressError(400, "description is missing!");     |                                                                  
+        |     }                                                               |        
+        |     if (!newListing.price) {                                        |                                
+        |         throw new ExpressError(400, "price is missing!");           |                                                            
+        |     }                                                               |        
+        |     if (!newListing.location) {                                     |                                  
+        |         throw new ExpressError(400, "location is missing!");        |                                                                
+        |     }                                                               |        
+        |     if (!newListing.country) {                                      |                                  
+        |         throw new ExpressError(400, "country is missing!");         |                                                              
+        |     }                                                               |        
+        |                                                                     |    
+        |     newListing.save().then(res => {                                 |                                      
+        |         console.log(res);                                           |                            
+        |     }).catch(err => {                                               |                        
+        |         console.log(err);                                           |                            
+        |     });                                                             |          
+        |                                                                     |    
+        |     res.redirect("listings");                                       |                                
+        | }));                                                                |
+        -----------------------------------------------------------------------
+
+=> so now we can use a Joi.dev api refrence for the Validations
+
+--------------------------------------------------
+| const Joi = require('joi');                    |                           
+|                                                | 
+| module.exports.listSchema = Joi.object({       |                                         
+|     listing: Joi.object({                      |                         
+|         title: Joi.string().required(),        |                                       
+|         description: Joi.string().required(),  |                                             
+|         image: Joi.string().allow("", null),   |                                             
+|         price: Joi.number().required().min(0), |                                               
+|         location: Joi.string().required(),     |                                           
+|         country: Joi.string().required(),      |                                         
+|     }).required()                              |                 
+| });                                            |   
+--------------------------------------------------
+
+-> and post request is :-
+
+---------------------------------------------------------------
+| app.post("/listings", wrapAsync(async (req, res, next) => { |                                                                          
+|                                                             |                
+|     let result = listSchema.validate(req.body);             |                                                              
+|     console.log(result);                                    |                                        
+|                                                             |                
+|     if(result.error) {                                      |                                      
+|         throw new ExpressError(400, result.error);          |                                                                  
+|     }                                                       |                    
+|                                                             |                
+|     let newListing = new Listing(req.body.listing);         |                                                                  
+|                                                             |                
+|     newListing.save().then(res => {                         |                                                  
+|         console.log(res);                                   |                                        
+|     }).catch(err => {                                       |                                    
+|         console.log(err);                                   |                                        
+|     });                                                     |                      
+|                                                             |                
+|     res.redirect("listings");                               |                                            
+| }));                                                        |                    
+---------------------------------------------------------------
+
+
+9. Validations for Schema (By using middielware) :=
+------------------------------------------------
+
+------------------------------------------------------------------------------
+| const Joi = require('joi');                                                |                               
+|                                                                            |     
+| module.exports.listSchema = Joi.object({                                   |                                             
+|     listing: Joi.object({                                                  |                             
+|         title: Joi.string().required(),                                    |                                           
+|         description: Joi.string().required(),                              |                                                 
+|         image: Joi.string().allow("", null),                               |                                                 
+|         price: Joi.number().required().min(0),                             |                                                   
+|         location: Joi.string().required(),                                 |                                               
+|         country: Joi.string().required(),                                  |                                             
+|     }).required()                                                          |                     
+| });                                                                        |       
+|                                                                            |     
+| const validatelisting = (req, res, next) => {                              |                                                 
+|     let { error } = listSchema.validate(req.body);                         |                                                       
+|     console.log(error);                                                    |                           
+|     if (error) {                                                           |                     
+|         let errMsg = error.details.map((el) => el.message).join(",");      |                                                                         
+|         throw new ExpressError(400, errMsg);                               |                                                 
+|     }                                                                      |         
+|     else {                                                                 |               
+|         next();                                                            |                   
+|     }                                                                      |         
+| };                                                                         |       
+------------------------------------------------------------------------------
