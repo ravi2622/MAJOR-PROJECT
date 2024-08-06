@@ -185,3 +185,236 @@ Note:-
 |     }                                                                      |         
 | };                                                                         |       
 ------------------------------------------------------------------------------
+
+10. New Model := Reviews
+-------------
+
+-> comment 
+-> rating(1 to 5)
+-> createdAt
+
+11. Create Reviews :=
+------------------
+
+1. Setting up the Reviews Form
+
+12. Create Reviews :=
+
+2. submitting the Form
+
+-> POST      /listings/:id/reviews
+
+12. Delete Reviews :=
+------------------
+
+-> Mongo $pull operator
+
+-----------------------------------------------------------------------------------------------------------------------------
+| $pull                                                                                                                     |
+|     The $pull operator remove from an existing array all instances of a value or values that match a specified condition. |
+-----------------------------------------------------------------------------------------------------------------------------
+
+13. express.Route() :=
+-------------------
+
+//user.js
+
+--------------------------------------------                                                    
+| const express = require("express");      |                                            
+| const router = express.Router();         |                                          
+|                                          |          
+| //index - users                          |                        
+| router.get("/", (req, res) => {          |                                        
+|     res.send("GET for users");           |                                        
+| });                                      |            
+|                                          |          
+| //show - users                           |                        
+| router.get("/:id", (req, res) => {       |                                            
+|     res.send("GET for user id");         |                                          
+| });                                      |            
+|                                          |          
+| //POST - users                           |                        
+| router.post("/", (req, res) => {         |                                          
+|     res.send("POST for users");          |                                        
+| });                                      |            
+|                                          |          
+| //DELETE - users                         |                          
+| router.delete("/:id", (req, res) => {    |                                              
+|     res.send("DELETE for user id");      |                                            
+| });                                      |            
+|                                          |          
+| module.exports = router;                 |                                  
+--------------------------------------------
+
+//server.js
+
+--------------------------------------------------
+| const express = require("express");            |                                           
+| const app = express();                         |                               
+| const users = require("./routes/user.js");     |                                                   
+| const posts = require("./routes/post.js");     |                                                   
+|                                                |         
+| app.get("/", (req, res) => {                   |                                     
+|     res.send("Hi, I am root!");                |                                       
+| });                                            |           
+|                                                |         
+| app.use("/users", users);                      |                                 
+| // app.use("/posts", posts);                   |                                     
+|                                                |         
+| app.listen(3000, () => {                       |                                 
+|     console.log("Server is listening to 3000");|                                                       
+| });                                            |           
+--------------------------------------------------
+
+14. Miscellaneous :=
+-----------------
+
+-> Express router
+-> cookies
+
+--> Express Router :=
+------------------
+
+-> Express Routers are a way to organize your Express application such that our primary app.js file does not become bloated.
+
+----------------------------------------------------------------
+| const router = express.Router() // creates new router object |
+----------------------------------------------------------------
+
+15. Restructuring Listings & reviews :=
+------------------------------------
+
+---------------------------------
+|app.use("/listings", listings);|
+---------------------------------
+
+------------------------------------------------
+| router = express.Router({mergParams: true}); |
+------------------------------------------------
+
+16. Cookies := Web Cookies
+-----------
+
+-> HTTP cookies are small blocks of data created by a web server while a user is browsing a website and placed on the user's computer or other device by the user's computer or other device by the user's web broweser
+
+17. How to send Cookies :=
+-----------------------
+
+-> in Express
+
+------------------------------------------
+| app.get("/setcookies", (req, res) => { |                                        
+|   res.cookie("greet", "namaste");      |                                    
+|   res.cookie("origin", "India");       |                                  
+|   res.send("we send you a cookies!");  |                                      
+| });                                    |    
+------------------------------------------
+
+-> res.cookie(name, value [, options])
+
+-> Sets cookie name to value. The value parameter may be a string or object converted to JSON.
+
+-> The options parameter is an object that can have the following properties.
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+| Property	  | Type	    | Description                                                                                                                                                   |
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+| domain	    | String	  | Domain name for the cookie. Defaults to the domain name of the app.                                                                                           |                                             
+| encode	    | Function	| A synchronous function used for cookie value encoding. Defaults to encodeURIComponent.                                                                        |                                                                 
+| expires	    | Date	    | Expiry date of the cookie in GMT. If not specified or set to 0, creates a session cookie.                                                                     |                                                                   
+| httpOnly	  | Boolean	  | Flags the cookie to be accessible only by the web server.                                                                                                     |                                   
+| maxAge	    | Number	  | Convenient option for setting the expiry time relative to the current time in milliseconds.                                                                   |                                                                     
+| path	      | String	  | Path for the cookie. Defaults to “/”.                                                                                                                         |               
+| partitioned	| Boolean	  | Indicates that the cookie should be stored using partitioned storage. See Cookies Having Independent Partitioned State (CHIPS) for more details.              |                                                                                                                           
+| priority	  | String	  | Value of the “Priority” Set-Cookie attribute.                                                                                                                 |                       
+| secure	    | Boolean	  | Marks the cookie to be used with HTTPS only.                                                                                                                  |                       
+| signed	    | Boolean	  | Indicates if the cookie should be signed.                                                                                                                     |                   
+| sameSite	  | Boolean   | or String	Value of the “SameSite” Set-Cookie attribute. More information at https://tools.ietf.org/html/draft-ietf-httpbis-cookie-same-site-00#section-4.1.1. |                                                                                                                                       
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+18. Cookie Parser :=
+
+-> cookie-parser package
+
+--------------------------------------------------
+| const cookieParser = require("cookie-parser"); |
+| app.use(cookieParser());                       |
+|                                                |
+| app.get("/getcookies", (req, res) => {         |
+|   console.dir(req.cookies);                    |
+|   res.send("got the cookies");                 |
+| });                                            |
+--------------------------------------------------
+
+-----------------------------------------------
+| app.get("/getcookies", (req, res) => {      |                                                 
+|   let { name = "anonymous" } = req.cookies; |                                                 
+|   res.send(`Hi, ${name}`);                  |                                 
+| });                                         |            
+-----------------------------------------------
+
+19. Signed Cookies :=
+------------------
+
+-> Send Signed Cookies
+
+app.use(cookieParser("secretcode"));
+
+---------------------------------------------------
+| app.get("/getsignedcookies", (req, res) => {    |
+|   res.cookie("color", "red", { signed: true }); |
+|   res.send("done!");                            |
+| });                                             |
+---------------------------------------------------
+
+-> Verify Signed Cookie
+
+--------------------------------------
+| app.get("/verify", (req, res) => { |                                 
+|   res.send(req.signedCookies);     |                             
+| })                                 | 
+--------------------------------------
+
+20. What is State :=
+-----------------
+
+-> stateful protocol - Staterotocol require server to save the status and session information.
+
+ex - ftp (file transfer protocol)
+--
+
+-> stateless protocol - stateless protocol does not require the server to retain the server information or session.
+
+ex - http
+--
+
+21. Express Session := An attempt to make our session stateful
+-------------------
+
+-> Express Session when any user are come to the our website and start any sesstion so express sesstion is make individiual session id for the perticular user and save the information mastion of the sesstion.
+
+        ex :- aapda ecomerse website pr koi user maniloke login kariya vagar aave ane cart ma items ne add karvanu sharu kari dey to te vastu badhi cart ma add thay jay che pan pay meant pela login mange che etle express na use thi koi sesstion statrt thay hase jeni koi id hase unqui and items save thati hase aavu badha user mate thay che.
+
+                                     (server)                                           (clients) -> from client side save the session id in the form of cookies
+            ---------------------------------------------------                       -------------
+            | user1 : sesstionId - 101                        |                       | --------- |
+                      information - {                 -|                                |       |
+                                      item: laptop,    |------------------------------> |  101  |      
+                                      item: charger   -|                                |       |
+                                    }                                                   ---------
+
+              -> same vastu mate pan temj koi bija user mate
+
+              user2 : sesstionId - 102                                                 ---------
+                      information - {                 -|                               |       |
+                                      item: laptop,    |------------------------------>|  102  |
+                                      item: charger   -|                               |       |
+                                    }                                                  ---------
+
+
+-> Session = one intercation between clint------
+                                       ^       |
+                                       |   &   |
+                                       |       v
+                                       -----server
+

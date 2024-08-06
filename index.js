@@ -4,10 +4,14 @@ let port = 8080;
 let path = require("path");
 const methodOverride = require("method-override");
 const Listing = require("./models/listing.js");
+const Review = require("./models/review.js");
 const ejsMate = require("ejs-mate");
 const wrapAsync = require("./utils/wrapAsync.js");
 const ExpressError = require("./utils/ExpressError.js");
-const { listSchema } = require("./schema.js");
+const { listSchema, reviewSchema } = require("./schema.js");
+
+const listings = require("./routes/listing.js");
+const reviews = require("./routes/review.js")
 
 const mongoose = require('mongoose');
 
@@ -44,6 +48,18 @@ const validatelisting = (req, res, next) => {
     }
 };
 
+const validatereview = (req, res, next) => {
+    let { error } = reviewSchema.validate(req.body);
+    console.log(error);
+    if (error) {
+        let errMsg = error.details.map((el) => el.message).join(",");
+        throw new ExpressError(400, errMsg);
+    }
+    else {
+        next();
+    }
+};
+
 app.get("/", (req, res) => {
     res.send("welcome to the wanderlust :)");
 });
@@ -64,100 +80,134 @@ app.get("/", (req, res) => {
 //     res.send(testing);
 // });
 
-app.get("/listings", wrapAsync(async (req, res, next) => {
-    let allListings = await Listing.find();
-    res.render("./listings/index.ejs", { allListings });
-}));
+//listing Routes are here for learn :=
 
-app.get("/listings/new", wrapAsync(async (req, res) => {
-    res.render("./listings/new.ejs");
-}));
+app.use("/listings", listings);
 
-app.post("/listings", validatelisting, wrapAsync(async (req, res, next) => {
+// app.get("/listings", wrapAsync(async (req, res, next) => {
+//     let allListings = await Listing.find();
+//     res.render("./listings/index.ejs", { allListings });
+// }));
 
-    // let {title, description, image, price, location, country} = req.body;
-    // let newListing = new Listing({
-    //     title: title,
-    //     description: description,
-    //     image: {
-    //         url: image,
-    //         filename: 'listingimage',
-    //     },
-    //     price: price,
-    //     location: location,
-    //     country: country,
-    // });
+// app.get("/listings/new", wrapAsync(async (req, res) => {
+//     res.render("./listings/new.ejs");
+// }));
 
-    // if (!req.body.listing) {
-    //     throw new ExpressError(400, "Send valid data for listing");
-    // }
+// app.post("/listings", validatelisting, wrapAsync(async (req, res, next) => {
 
-    // let result = listSchema.validate(req.body);
-    // console.log(result);
-    // if(result.error) {
-    //     throw new ExpressError(400, result.error);
-    // }
+//     // let {title, description, image, price, location, country} = req.body;
+//     // let newListing = new Listing({
+//     //     title: title,
+//     //     description: description,
+//     //     image: {
+//     //         url: image,
+//     //         filename: 'listingimage',
+//     //     },
+//     //     price: price,
+//     //     location: location,
+//     //     country: country,
+//     // });
 
-    let newListing = new Listing(req.body.listing);
+//     // if (!req.body.listing) {
+//     //     throw new ExpressError(400, "Send valid data for listing");
+//     // }
 
-    // if (!newListing.title) {
-    //     throw new ExpressError(400, "Title is missing!");
-    // }
-    // if (!newListing.description) {
-    //     throw new ExpressError(400, "description is missing!");
-    // }
-    // if (!newListing.price) {
-    //     throw new ExpressError(400, "price is missing!");
-    // }
-    // if (!newListing.location) {
-    //     throw new ExpressError(400, "location is missing!");
-    // }
-    // if (!newListing.country) {
-    //     throw new ExpressError(400, "country is missing!");
-    // }
+//     // let result = listSchema.validate(req.body);
+//     // console.log(result);
+//     // if(result.error) {
+//     //     throw new ExpressError(400, result.error);
+//     // }
 
-    newListing.save().then(res => {
-        console.log(res);
-    }).catch(err => {
-        console.log(err);
-    });
+//     let newListing = new Listing(req.body.listing);
 
-    res.redirect("listings");
-}));
+//     // if (!newListing.title) {
+//     //     throw new ExpressError(400, "Title is missing!");
+//     // }
+//     // if (!newListing.description) {
+//     //     throw new ExpressError(400, "description is missing!");
+//     // }
+//     // if (!newListing.price) {
+//     //     throw new ExpressError(400, "price is missing!");
+//     // }
+//     // if (!newListing.location) {
+//     //     throw new ExpressError(400, "location is missing!");
+//     // }
+//     // if (!newListing.country) {
+//     //     throw new ExpressError(400, "country is missing!");
+//     // }
 
-app.get("/listings/:id/edit", wrapAsync(async (req, res) => {
-    let { id } = req.params;
-    let listing = await Listing.findById(id);
-    console.log(listing);
-    res.render("./listings/edit.ejs", { listing });
-}));
+//     newListing.save().then(res => {
+//         console.log(res);
+//     }).catch(err => {
+//         console.log(err);
+//     });
 
-app.put("/listings/:id", validatelisting, wrapAsync(async (req, res, next) => {
-    let { id } = req.params;
-    console.log(id);
+//     res.redirect("listings");
+// }));
 
-    // if (!req.body.listing) {
-    //     throw new ExpressError(400, "Send valid data for listing");
-    // }
+// app.get("/listings/:id/edit", wrapAsync(async (req, res) => {
+//     let { id } = req.params;
+//     let listing = await Listing.findById(id);
+//     console.log(listing);
+//     res.render("./listings/edit.ejs", { listing });
+// }));
 
-    await Listing.findByIdAndUpdate(id, { ...req.body.listing });
-    res.redirect(`/listings/${id}`);
-}));
+// app.put("/listings/:id", validatelisting, wrapAsync(async (req, res, next) => {
+//     let { id } = req.params;
+//     console.log(id);
 
-app.get("/listings/:id", wrapAsync(async (req, res) => {
-    let { id } = req.params;
-    console.log(id);
-    const listing = await Listing.findById(id);
-    console.log(listing);
-    res.render("./listings/show.ejs", { listing });
-}));
+//     // if (!req.body.listing) {
+//     //     throw new ExpressError(400, "Send valid data for listing");
+//     // }
 
-app.delete("/listings/:id", wrapAsync(async (req, res) => {
-    let { id } = req.params;
-    await Listing.findByIdAndDelete(id);
+//     await Listing.findByIdAndUpdate(id, { ...req.body.listing });
+//     res.redirect(`/listings/${id}`);
+// }));
 
-    res.redirect("/listings");
-}));
+// app.get("/listings/:id", wrapAsync(async (req, res) => {
+//     let { id } = req.params;
+//     console.log(id);
+//     const listing = await Listing.findById(id).populate("reviews");
+//     console.log(listing);
+//     res.render("./listings/show.ejs", { listing });
+// }));
+
+// app.delete("/listings/:id", wrapAsync(async (req, res) => {
+//     let { id } = req.params;
+//     await Listing.findByIdAndDelete(id);
+
+//     res.redirect("/listings");
+// }));
+
+//review Routes are here for learn :=
+
+app.use("/listings/:id/reviews", reviews);
+
+// //reviews - post
+// app.post("/listings/:id/reviews", validatereview, wrapAsync(async (req, res) => {
+//     let listing = await Listing.findById(req.params.id);
+//     let newreview = new Review(req.body.review);
+//     console.log(newreview);
+
+//     listing.reviews.push(newreview);
+
+//     await newreview.save().then(res => { console.log(res) }).catch(err => { console.log(err) });
+//     await listing.save().catch(err => { console.log(err) });
+
+//     console.log("new review save!");
+
+//     res.redirect(`/listings/${req.params.id}`);
+// }));
+
+// //delte review rout
+// app.delete("/listings/:id/reviews/:reviewsId", wrapAsync(async (req, res) => {
+//     let {id, reviewsId} = req.params;
+
+//     await Listing.findByIdAndUpdate(id, {$pull: {reviews: reviewsId}}).then(res => {console.log(res)}).catch(err => {console.log(err)});
+//     await Review.findByIdAndDelete(reviewsId);
+
+//     res.redirect(`/listings/${id}`);
+// }))
 
 app.all("*", (req, res, next) => {
     console.log("new error!");
