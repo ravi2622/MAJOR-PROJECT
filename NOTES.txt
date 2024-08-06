@@ -385,11 +385,11 @@ ex - ftp (file transfer protocol)
 
 -> stateless protocol - stateless protocol does not require the server to retain the server information or session.
 
-ex - http
+ex - http (hiper text transfer protocol)
 --
 
-21. Express Session := An attempt to make our session stateful
--------------------
+21. Express Session (npm package) := An attempt to make our session stateful
+---------------------------------
 
 -> Express Session when any user are come to the our website and start any sesstion so express sesstion is make individiual session id for the perticular user and save the information mastion of the sesstion.
 
@@ -417,4 +417,167 @@ ex - http
                                        |   &   |
                                        |       v
                                        -----server
+-> npm package :-
 
+------------------------------------
+| app.use(session({                |              
+|   secret: 'mysupersecretstring', |                      
+|   resave: false,                 |              
+|   saveUninitialized: true,       |                        
+|   // cookie: { secure: true }    |                          
+| }));                             |
+------------------------------------
+
+-> storing and using info :-
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+| const sesstionOpstion = { //-> aa veriybal no use jo aapde futerma koi extra session ne add karva hoy to banaviu che jene aapde app.use() middelvar ma mokalsu. |                                                                                                                                                                              
+|     secret: 'mysupersecretstring',                                                                                                                              |                                                  
+|     resave: false,                                                                                                                                              |                                  
+|     saveUninitialized: true,                                                                                                                                    |                                            
+|     // cookie: { secure: true }                                                                                                                                 |                                              
+| }                                                                                                                                                               |                
+|                                                                                                                                                                 |                
+| app.use(session(sesstionOpstion));                                                                                                                              |                                                  
+|                                                                                                                                                                 |                
+| app.get("/register", (req, res) => {                                                                                                                            |                                                    
+|     let {name = "anonymous"} = req.query;                                                                                                                       |                                                        
+|     console.log(req.session);                                                                                                                                   |                                            
+|     req.session.name = name;                                                                                                                                    |                                            
+|     console.log(req.session.name);                                                                                                                              |                                                  
+|     // res.send(name);                                                                                                                                          |                                      
+|     res.redirect("/hello");                                                                                                                                     |                                          
+| });                                                                                                                                                             |                  
+|                                                                                                                                                                 |                
+| app.get("/hello", (req, res) => {                                                                                                                               |                                                
+|     res.send(`Hello ${req.session.name}`);                                                                                                                      |                                                          
+| });                                                                                                                                                             |                  
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+22. connect-flash := (npm package - using for the flash the messages)
+-----------------
+
+--> The flash is a special area of the session used for storing message. Message are writtnen to the flash and cleared after being displayed to the user.
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+| const sesstionOpstion = { //-> aa veriybal no use jo aapde futerma koi extra session ne add karva hoy to banaviu che jene aapde app.use() middelvar ma mokalsu. |                                                                                                                                                                              
+|     secret: 'mysupersecretstring',                                                                                                                              |                                                  
+|     resave: false,                                                                                                                                              |                                  
+|     saveUninitialized: true,                                                                                                                                    |                                            
+|     // cookie: { secure: true }                                                                                                                                 |                                              
+| }                                                                                                                                                               |                
+|                                                                                                                                                                 |                
+| app.use(session(sesstionOpstion));                                                                                                                              |                                                  
+| app.use(flash());                                                                                                                                               |                                
+|                                                                                                                                                                 |                
+| app.get("/register", (req, res) => {                                                                                                                            |                                                    
+|     let { name = "anonymous" } = req.query;                                                                                                                     |                                                          
+|     console.log(req.session);                                                                                                                                   |                                            
+|     req.session.name = name;                                                                                                                                    |                                            
+|     console.log(req.session.name);                                                                                                                              |                                                  
+|     req.flash("success", "user registered succesfully");                                                                                                        |                                                                        
+|     // res.send(name);                                                                                                                                          |                                      
+|     res.redirect("/hello");                                                                                                                                     |                                          
+| });                                                                                                                                                             |                  
+|                                                                                                                                                                 |                
+| app.get("/hello", (req, res) => {                                                                                                                               |                                                
+|     res.render("page.ejs", { name: req.session.name, msg: req.flash("success") });                                                                              |                                                                                                  
+| });                                                                                                                                                             |                  
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+-> Better way to flash the message is res.local :-
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+| const sesstionOpstion = { //-> aa veriybal no use jo aapde futerma koi extra session ne add karva hoy to banaviu che jene aapde app.use() middelvar ma mokalsu. |                                                                                                                                                                            
+|     secret: 'mysupersecretstring',                                                                                                                              |                                                
+|     resave: false,                                                                                                                                              |                                
+|     saveUninitialized: true,                                                                                                                                    |                                          
+|     // cookie: { secure: true }                                                                                                                                 |                                            
+| }                                                                                                                                                               |              
+|                                                                                                                                                                 |              
+| app.use(session(sesstionOpstion));                                                                                                                              |                                                
+| app.use(flash());                                                                                                                                               |                              
+|                                                                                                                                                                 |              
+| app.get("/register", (req, res) => {                                                                                                                            |                                                  
+|     let { name = "anonymous" } = req.query;                                                                                                                     |                                                        
+|     console.log(req.session);                                                                                                                                   |                                          
+|     req.session.name = name;                                                                                                                                    |                                          
+|     console.log(req.session.name);                                                                                                                              |                                                
+|                                                                                                                                                                 |              
+|     // req.flash("success", "user registered succesfully");                                                                                                     |                                                                        
+|                                                                                                                                                                 |              
+|     if (name === "anonymous") {                                                                                                                                 |                                            
+|         req.flash("error", "user not registered!");                                                                                                             |                                                                
+|     } else {                                                                                                                                                    |                          
+|         req.flash("success", "user registered succesfully");                                                                                                    |                                                                          
+|     }                                                                                                                                                           |                  
+|                                                                                                                                                                 |              
+|     // res.send(name);                                                                                                                                          |                                    
+|     res.redirect("/hello");                                                                                                                                     |                                        
+| });                                                                                                                                                             |                
+|                                                                                                                                                                 |              
+| app.get("/hello", (req, res) => {                                                                                                                               |                                              
+|     // res.render("page.ejs", { name: req.session.name, msg: req.flash("success") });                                                                           |                                                                                                  
+|                                                                                                                                                                 |              
+|     res.locals.sucessMsg = req.flash("success"); //-> dayerect pass karvani have jaroor nathi auto metic page.ejs ma save thay jay che.                         |                                                                                                                                                    
+|     res.locals.errorMsg = req.flash("error");                                                                                                                   |                                                          
+|     res.render("page.ejs", { name: req.session.name });                                                                                                         |                                                                    
+| });                                                                                                                                                             |
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+--> for the flash message viya res.local using middelvar :-
+
+----------------------------------------------------
+| app.use((req, res, next) => {                    |                                    
+|     res.locals.sucessMsg = req.flash("success"); |                                                       
+|     res.locals.errorMsg = req.flash("error");    |                                                   
+|                                                  |
+|     next();                                      |                 
+| })                                               |        
+----------------------------------------------------
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+| const sesstionOpstion = { //-> aa veriybal no use jo aapde futerma koi extra session ne add karva hoy to banaviu che jene aapde app.use() middelvar ma mokalsu. |                                                                                                                                                                        
+|     secret: 'mysupersecretstring',                                                                                                                              |                                          
+|     resave: false,                                                                                                                                              |                          
+|     saveUninitialized: true,                                                                                                                                    |                                    
+|     // cookie: { secure: true }                                                                                                                                 |                                        
+| }                                                                                                                                                               |          
+|                                                                                                                                                                 |        
+| app.use(session(sesstionOpstion));                                                                                                                              |                                          
+| app.use(flash());                                                                                                                                               |                          
+|                                                                                                                                                                 |        
+| app.use((req, res, next) => {                                                                                                                                   |                                      
+|     res.locals.sucessMsg = req.flash("success");                                                                                                                |                                                        
+|     res.locals.errorMsg = req.flash("error");                                                                                                                   |                                                      
+|                                                                                                                                                                 |        
+|     next();                                                                                                                                                     |                    
+| });                                                                                                                                                             |            
+|                                                                                                                                                                 |        
+| app.get("/register", (req, res) => {                                                                                                                            |                                            
+|     let { name = "anonymous" } = req.query;                                                                                                                     |                                                    
+|     console.log(req.session);                                                                                                                                   |                                      
+|     req.session.name = name;                                                                                                                                    |                                    
+|     console.log(req.session.name);                                                                                                                              |                                          
+|                                                                                                                                                                 |        
+|     // req.flash("success", "user registered succesfully");                                                                                                     |                                                                    
+|                                                                                                                                                                 |        
+|     if (name === "anonymous") {                                                                                                                                 |                                        
+|         req.flash("error", "user not registered!");                                                                                                             |                                                            
+|     } else {                                                                                                                                                    |                    
+|         req.flash("success", "user registered succesfully");                                                                                                    |                                                                    
+|     }                                                                                                                                                           |              
+|                                                                                                                                                                 |        
+|     // res.send(name);                                                                                                                                          |                              
+|     res.redirect("/hello");                                                                                                                                     |                                    
+| });                                                                                                                                                             |            
+|                                                                                                                                                                 |        
+| app.get("/hello", (req, res) => {                                                                                                                               |                                          
+|     // res.render("page.ejs", { name: req.session.name, msg: req.flash("success") });                                                                           |                                                                                              
+|                                                                                                                                                                 |        
+|     // res.locals.sucessMsg = req.flash("success"); //-> dayerect pass karvani have jaroor nathi auto metic page.ejs ma save thay jay che.                      |                                                                                                                                                  
+|     // res.locals.errorMsg = req.flash("error");                                                                                                                |                                                        
+|                                                                                                                                                                 |        
+|     res.render("page.ejs", { name: req.session.name });                                                                                                         |                                                                
+| });                                                                                                                                                             |            
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
