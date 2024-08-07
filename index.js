@@ -9,9 +9,15 @@ const ejsMate = require("ejs-mate");
 const wrapAsync = require("./utils/wrapAsync.js");
 const ExpressError = require("./utils/ExpressError.js");
 const { listSchema, reviewSchema } = require("./schema.js");
+const session = require("express-session");
+const flash = require("connect-flash");
+const passport = require("passport");
+const LocalStrategy = require("passport-local")
+const User = require("./models/user.js");
 
-const listings = require("./routes/listing.js");
-const reviews = require("./routes/review.js")
+const listingsRouter = require("./routes/listing.js");
+const reviewsRouter = require("./routes/review.js");
+const userRouter = require("./routes/user.js");
 
 const mongoose = require('mongoose');
 
@@ -60,9 +66,56 @@ const validatereview = (req, res, next) => {
     }
 };
 
+const sesstionOpstion = {
+    secret: 'mysupersecretstring',
+    resave: false,
+    saveUninitialized: true,
+    cookie: {
+        expires: Date.now() + 1000 * 60 * 60 * 24 * 3,
+        maxAge: 1000 * 60 * 24 * 3,
+        httpOnly: true
+    },
+};
+
+app.use(session(sesstionOpstion));
+app.use(flash());
+
+app.use(passport.initialize());
+app.use(passport.session());
+passport.use(new LocalStrategy(User.authenticate()));
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+
+app.use((req, res, next) => {
+    res.locals.success = req.flash("success");
+    res.locals.error = req.flash("error");
+
+    // console.log(res.locals.success);
+    // console.log(res.locals.error);
+
+    next();
+});
+
+// // -> this route it just a demo for the learn authenticate data how to store in data base
+// app.get("/demouser", async (req, res) => {
+//     let fackuser = new User({
+//         username: "preeti",
+//         email: "vataliyag174@gmail.com",
+//     });
+
+//     let registeredUser = await User.register(fackuser, "Ravi@2622");
+
+//     let data = await User.find();
+//     console.log(data);
+
+//     res.send(registeredUser);
+// });
+
 app.get("/", (req, res) => {
     res.send("welcome to the wanderlust :)");
 });
+
+app.use("/", userRouter);
 
 // app.get("/testinglist", async (req, res) => {
 //     let sampleList = new Listing({
@@ -82,7 +135,7 @@ app.get("/", (req, res) => {
 
 //listing Routes are here for learn :=
 
-app.use("/listings", listings);
+app.use("/listings", listingsRouter);
 
 // app.get("/listings", wrapAsync(async (req, res, next) => {
 //     let allListings = await Listing.find();
@@ -181,7 +234,7 @@ app.use("/listings", listings);
 
 //review Routes are here for learn :=
 
-app.use("/listings/:id/reviews", reviews);
+app.use("/listings/:id/reviews", reviewsRouter);
 
 // //reviews - post
 // app.post("/listings/:id/reviews", validatereview, wrapAsync(async (req, res) => {

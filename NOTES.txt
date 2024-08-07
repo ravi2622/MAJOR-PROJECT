@@ -581,3 +581,119 @@ ex - http (hiper text transfer protocol)
 |     res.render("page.ejs", { name: req.session.name });                                                                                                         |                                                                
 | });                                                                                                                                                             |            
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+23. Using Sessions := Adding Cookie Opstions
+------------------
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+| const sesstionOpstion = { //-> aa veriybal no use jo aapde futerma koi extra session ne add karva hoy to banaviu che jene aapde app.use() middelvar ma mokalsu. |                                                                                                                                                                        
+|     secret: 'mysupersecretstring',                                                                                                                              |                                          
+|     resave: false,                                                                                                                                              |                          
+|     saveUninitialized: true,                                                                                                                                    |                                    
+|     cookie: {                                                                                                                                                   |                                                                    
+|       expires: Date.now() + 1000 * 60 * 60 * 24 * 3, //in miliy secound for 3 days                                                                              |                                                              
+|       maxAge: 1000 * 60 * 24 * 3,                                                                                                                               |                                          
+|       httpOnly: true, //for the security perpous                                                                                                                |                              
+|     },                                                                                                                                                          |                
+| };                                                                                                                                                              |                                                                                                                                        |                                        
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+24. Authentication & Authorization :=
+----------------------------------
+
+-> Authentication :- Authentication is the process of verifying who someone to -> singup & login
+
+-> Authorization :- Authorization is the process of verifying what specific applications, files, and data a user has access to 
+
+--> Storing Passwords := We NEVER store the passwords as it is. We store their hashed form.
+---------------------
+
+--------------------------------------------------------------------------------------------------------
+|                 ------------                                                                         | 
+| password        |  Hshing  |     how it is store                                                     |
+| "helloworld"    | Function |     "936a185caaa266bb9cbe981e9e05cb78cd732b0b3280eb944412bb6f8f8fO7af"  |
+|                 ------------                                                                         |
+--------------------------------------------------------------------------------------------------------
+
+--> Hashing := What we know?
+-----------
+
+-> For every input, there is a fixed output
+
+-> They are one-way function, we can't get input from output
+
+-> For a different input, there is a different output but of same length
+
+-> Small changes in input should bring large changes in output
+
+Ex :- SHA256
+      MD5
+      CRC 
+      BERYPT
+
+--> Salting :-
+-----------
+
+-> Password salting is a technique to protect passwords stored in databases by adding a stiring of 32 or more characteres and then hashing them.
+
+--> Passport :- (npm package)
+------------
+
+-> pssport is the node js librery that can use for the Authentication. Passport is autometicaly conver the password in the form hashing with include salts. we can singup with google, facebook, github and many more in Passport.
+
+-> npm i Passport
+-> npm i passport-local
+-> npm i Passport-local-mongoose
+
+--> User Model :=
+--------------
+
+-> user: username, password: email
+
+-> you're free to define your User how you like. Passport-Local mongoose will add a username, hash and slat filed to sotre the usernmae, the hashed passowrd and the salt value.
+
+-> Additionally, Passport-Local Mongoose adds some methods to your Schema.see the API 
+
+--> Configering Strategy := (Basic setting it means)
+------------------------
+
+=> passport.initialize(); -> A middleware that initializes passport.
+
+=> passport.session(); -> A web application needs the ability to identify users as they browse from page to page. This series of request and responses, each associated with the same user, is known as a session.
+
+=> passport.use(new LocalStrategy(User.authenticate()));
+
+=> passport.serializeUser(User.serializeUser()); => user ni information ne jo aapde session ma store karviye to aa method no use thay che serializeUser.
+=> passport.deserializeUser(User.deserializeUser()); => user ni information ne jo aapde session mathi unstore,remove karviye to aa method no use thay che deserializeUser.
+
+25. Demo user :=
+-------------
+
+------------------------------------------------------------------------
+| app.get("/demouser", async (req, res) => {                           |                                              
+|     let fackuser = new User({                                        |                                
+|         username: "preeti",                                          |                              
+|         email: "vataliyag174@gmail.com",                             |                                            
+|     });                                                              |          
+|                                                                      |    
+|     let registeredUser = await User.register(fackuser, "Ravi@2622"); |                                                                        
+|                                                                      |    
+|     let data = await User.find();                                    |                                    
+|     console.log(data);                                               |                          
+|                                                                      |    
+|     res.send(registeredUser);                                        |                                
+| });                                                                  |      
+------------------------------------------------------------------------
+
+--> Signup User :=
+---------------
+
+->    Get     /singup
+
+      Post    /Signup
+
+--> Login User :=
+--------------
+
+->    Get     /login
+      Post    /login
