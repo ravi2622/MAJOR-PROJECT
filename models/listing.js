@@ -31,7 +31,11 @@ let listingSchema = new schema({
     reviews: [{
         type: schema.Types.ObjectId,
         ref: "Review",
-    }]
+    }],
+    owner: {
+        type: schema.Types.ObjectId,
+        ref: "User",
+    }
 });
 
 

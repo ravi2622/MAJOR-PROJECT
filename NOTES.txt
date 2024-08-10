@@ -332,7 +332,10 @@ Note:-
 | sameSite	  | Boolean   | or String	Value of the “SameSite” Set-Cookie attribute. More information at https://tools.ietf.org/html/draft-ietf-httpbis-cookie-same-site-00#section-4.1.1. |                                                                                                                                       
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-18. Cookie Parser :=
+18. Cookie-Parser :=
+-----------------
+
+-> Parse Cookie header and populate req.cookies with an object keyed by the cookie names. Optionally you may enable signed cookie support by passing a secret string, which assigns req.secret so it may be used by other middleware.
 
 -> cookie-parser package
 
@@ -697,3 +700,142 @@ Ex :- SHA256
 
 ->    Get     /login
       Post    /login
+
+26. Connecting Login Route :=
+--------------------------
+
+-> How to check if User is Logged in?
+
+=> req.isAuthenticated(); // Passport method
+
+---------------------------------------------------------------------------
+| router.get("/new", wrapAsync(async (req, res) => {                      |                                               
+|     if(!req.isAuthenticated()) {                                        |                             
+|         req.flash("error", "you must be logged in to create listing!"); |                                                                   
+|         return res.redirect("/login");                                  |                                   
+|     }                                                                   | 
+|     res.render("./listings/new.ejs");                                   |                                 
+| }));                                                                    | 
+---------------------------------------------------------------------------
+
+27. LogOut User := 
+---------------
+
+// in user Route
+----------------------------------------------
+| router.get("/logout", (req, res) => {      |                                     
+|   req.logout((err) => {                    |                       
+|     if (err) {                             |               
+|       return next(err);                    |                       
+|     }                                      |     
+|     req.flash("success", "logged you out");|                                           
+|     res.redirect("/listings");             |                               
+|   });                                      |     
+| });                                        |   
+----------------------------------------------
+
+28. Add Styling :=
+---------------
+
+               ----> Undefined (not Logged in) -> signup, login
+               |
+-> req.user ---*
+               |
+               ----> obj (logged in) -> logout
+
+-------------------------------------------------------------------------------------------
+| //-> in index.js                                                                        |                                        
+|                                                                                         |                        
+| app.use((req, res, next) => {                                                           |                                                    
+|     res.locals.success = req.flash("success");                                          |                                                                      
+|     res.locals.error = req.flash("error");                                              |                                                                  
+|     res.locals.currUser = req.user;                                                     |                                                          
+|                                                                                         |                        
+|     // console.log(res.locals.success);                                                 |                                                              
+|     // console.log(res.locals.error);                                                   |                                                            
+|                                                                                         |                        
+|     next();                                                                             |                                  
+| });                                                                                     |                          
+|                                                                                         |                        
+|                                                                                         |                        
+| //-> in nav bar                                                                         |                                        
+|                                                                                         |                        
+|             <ul class="navbar-nav ms-auto">                                             |                                                                  
+|                 <% if(!currUser) { %>                                                   |                                                            
+|                 <li class="nav-item">                                                   |                                                            
+|                     <a class="nav-link underline-slide"  href="/singnup">Sing up</a>    |                                                                                                            
+|                 </li>                                                                   |                                            
+|                 <li class="nav-item">                                                   |                                                            
+|                     <a class="nav-link underline-slide" href="/login">Log in</a>        |                                                                                                        
+|                 </li>                                                                   |                                            
+|                 <% }; %>                                                                |                                                
+|                                                                                         |                        
+|                 <% if(currUser) { %>                                                    |                                                            
+|                 <li class="nav-item">                                                   |                                                            
+|                     <a class="nav-link underline-slide" href="/logout">Log out</a>      |                                                                                                          
+|                 </li>                                                                   |                                            
+|                 <% }; %>                                                                |                                                
+|                                                                                         |                        
+|             </ul>                                                                       |                                        
+-------------------------------------------------------------------------------------------
+
+29. Login after SignUp :=
+----------------------
+
+-> Passport's login method automatically establishes a login session.
+
+-> We can invoke login to automatically login user.
+
+-----------------------------------------------------
+| req.login(registeredUser, (err) => {              |                                          
+|   if(err) {                                       |                
+|     next(err);                                    |                    
+|   }                                               |        
+|   req.flash("success", "Welcome to Wanderlust!"); |                                                      
+|   res.redirect("/listings");                      |                                  
+| });                                               |        
+-----------------------------------------------------
+
+30. post-login page :=
+-------------------
+
+------------------------------------------------------------------------------
+| // -> using middielware                                                    |                                               
+| module.exports.isLoggdIn = (req, res, next) => {                           |                                                                       
+|     if(!req.isAuthenticated()) {                                           |                                                       
+|         console.log(req.orignalUral);                                      |                                                           
+|         req.session.redirectUrl = req.originalUrl;                         |                                                                         
+|         req.flash("error", "you must be logged in to create listing!");    |                                                                                             
+|         return res.redirect("/login");                                     |                                                             
+|     }                                                                      |                           
+|     next();                                                                |                                 
+| };                                                                         |                         
+|                                                                            |                       
+| module.exports.saveRedirectUrl = (req, res, next) => {                     |                                                                             
+|     if(req.session.redirectUrl) {                                          |                                                       
+|         res.locals.redirectUrl = req.session.redirectUrl;                  |                                                                               
+|     }                                                                      |                           
+|                                                                            |
+|     next();                                                                |
+| };                                                                         |
+------------------------------------------------------------------------------
+
+---------------------------------------------------------------------------
+| // using in user.js :=                                                  |                            
+| router.get("/login", (req, res) => {                                    |                                          
+|     res.render("./users/login.ejs");                                    |                                          
+| });                                                                     |        
+|                                                                         |      
+| router.post("/login", saveRedirectUrl, passport.authenticate("local", { |                                                                            
+|     failureRedirect: "/login",                                          |                                    
+|     failureFlash: true                                                  |                            
+| }), wrapAsync(async (req, res) => {                                     |                                        
+|     req.flash("success", "Welcome to Wanderlust! You are logged in!");  |                                                                            
+|     let redirectUrl = res.locals.redirectUrl || "/listings";            |                                                                  
+|     res.redirect(redirectUrl);                                          |                                    
+| }));                                                                    |          
+---------------------------------------------------------------------------
+
+31. Listing Owner :=
+-----------------
+

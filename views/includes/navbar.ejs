@@ -16,6 +16,23 @@
                     <a class="nav-link underline-slide" href="/listings/new">New Listings</a>
                 </li>
             </ul>
+            <ul class="navbar-nav ms-auto">
+                <% if(!currUser) { %>
+                <li class="nav-item">
+                    <a class="nav-link underline-slide"  href="/singnup">Sing up</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link underline-slide" href="/login">Log in</a>
+                </li>
+                <% }; %>
+
+                <% if(currUser) { %>
+                <li class="nav-item">
+                    <a class="nav-link underline-slide" href="/logout">Log out</a>
+                </li>
+                <% }; %>
+
+            </ul>
         </div>
     </div>
 </nav>

@@ -17,10 +17,10 @@ app.use(express.urlencoded({ extended: true }));
 
 // //cookies for learn
 
-// const cookieParser = require("cookie-parser");
+const cookieParser = require("cookie-parser");
 
 // // app.use(cookieParser());
-// app.use(cookieParser("secretcode"));
+// app.use(cookieParser("anysecretcod"));
 
 // app.get("/getcookies", (req, res) => {
 //     res.cookie("greet", "namaste");
