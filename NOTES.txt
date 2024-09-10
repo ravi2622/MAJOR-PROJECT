@@ -839,3 +839,186 @@ Ex :- SHA256
 31. Listing Owner :=
 -----------------
 
+-> The middielware for the find owner of the list and then owner can delete and edit post.
+
+------------------------------------------------------------------------
+| module.exports.isOwner = async (req, res, next) => {                 |                                                       
+|     let { id } = req.params;                                         |                               
+|     let listing = await Listing.findById(id);                        |                                               
+|     if (!listing.owner.equals(res.locals.currUser._id)) {            |                                                           
+|         req.flash("error", "you are not a owner of the listing!");   |                                                                     
+|         return res.redirect(`/listings/${id}`);                      |                                                 
+|     }                                                                |       
+|                                                                      |   
+|     next();                                                          |                 
+| };                                                                   |
+------------------------------------------------------------------------
+
+-> listing.js code for the find ownder and than edit
+
+-------------------------------------------------------------------------------------------------
+| router.put("/:id", validatelisting, isLoggdIn, isOwner, wrapAsync(async (req, res, next) => { |                                                                                                    
+|     let { id } = req.params;                                                                  |                                    
+|     console.log(id);                                                                          |                            
+|                                                                                               |        
+|     // if (!req.body.listing) {                                                               |                                      
+|     //     throw new ExpressError(400, "Send valid data for listing");                        |                                                                              
+|     // }                                                                                      |                
+|                                                                                               |        
+|     await Listing.findByIdAndUpdate(id, { ...req.body.listing });                             |                                                                        
+|                                                                                               |        
+|     req.flash("success", "Successfuly Edit listing!");                                        |                                                              
+|                                                                                               |        
+|     res.redirect(`/listings/${id}`);                                                          |                                            
+| }));                                                                                          |            
+|                                                                                               |        
+| router.get("/:id", wrapAsync(async (req, res) => {                                            |                                                          
+|     let { id } = req.params;                                                                  |                                    
+|     console.log(id);                                                                          |                            
+|     const listing = await Listing.findById(id).populate("reviews").populate("owner");         |                                                                                            
+|     console.log(listing);                                                                     |                                
+|                                                                                               |        
+|     if (!listing) {                                                                           |                          
+|         req.flash("error", "listing does not exsit!");                                        |                                                              
+|         res.redirect("/listings");                                                            |                                          
+|     } else {                                                                                  |                    
+|         res.render("./listings/show.ejs", { listing });                                       |                                                              
+|     }                                                                                         |            
+|                                                                                               |        
+| }));                                                                                          |            
+|                                                                                               |        
+| router.delete("/:id", isLoggdIn, isOwner, wrapAsync(async (req, res) => {                     |                                                                                
+|     let { id } = req.params;                                                                  |                                    
+|     await Listing.findByIdAndDelete(id);                                                      |                                                
+|                                                                                               |        
+|     req.flash("success", "Listing Deleted!");                                                 |                                                    
+|                                                                                               |        
+|     res.redirect("/listings");                                                                |                                      
+| }));                                                                                          |            
+|                                                                                               |        
+| module.exports = router;                                                                      |                                
+-------------------------------------------------------------------------------------------------
+
+--> In show.ejs page the user who can owner of the list is an only see the edit and delete button for edit and delete from clint side.
+
+--------------------------------------------------------------------------------------------------
+|  <% if(currUser && currUser._id.equals(listing.owner._id)) {%>                                 |                                                                       
+|                                                                                                |             
+|  <div class="btns">                                                                            |                           
+|      <a href="/listings/<%= listing._id %>/edit" class="btn btn-dark col-1 offset-3 edit-btn"> |                                                                                                       
+|          Edit                                                                                  |                     
+|      </a>                                                                                      |                 
+|      <form action="/listings/<%= listing._id %>/?_method=Delete" method="post">                |                                                                                       
+|          <button class="btn btn-dark offset-5">                                                |                                                       
+|              Delete                                                                            |                           
+|          </button>                                                                             |                           
+|      </form>                                                                                   |                     
+|  </div>                                                                                        |               
+|                                                                                                |       
+|  <% }; %>                                                                                      |                 
+--------------------------------------------------------------------------------------------------
+
+32. Authorization for _reviews :=
+------------------------------
+
+-> reviews Model ma ek author hovo joi ye je currUser hoy jene comment kari hoy.
+
+-> koi login na hoy tya lagi show.js ma aavel form show na thay 
+
+-----------------------------------------------------------------------------------------------------
+| <% if(currUser) { %>                                                                              |              
+| <h4 class="offset-3">Leave a Review</h4>                                                          |                                  
+| <form action="/listings/<%= listing._id %>/reviews" method="post"                                 |                                                          
+|     class="col-8 offset-3 mb-3 needs-validation" novalidate>                                      |                                                      
+|     <div class="mb-3 mt-3">                                                                       |                    
+|         <label for="rating" class="form-label">Rating</label>                                     |                                                      
+|         <input type="range" min="1" max="5" id="rating" name="review[rating]" class="form-range"> |                                                                                          
+|     </div>                                                                                        |    
+|     <div class="mb-3 mt-3">                                                                       |                    
+|         <label for="comment" class="form-label">Comments</label><br>                              |                                                              
+|         <textarea class="form-control" name="review[comment]" id="comment" cols="30" rows="10"    |                                                                                        
+|             required></textarea>                                                                  |                          
+|         <div class="invalid-feedback">                                                            |                                
+|             Please Enter Comment                                                                  |                          
+|         </div>                                                                                    |        
+|     </div>                                                                                        |    
+|     <button class="btn btn-outline-dark">Submit</button>                                          |                                                  
+| </form>                                                                                           | 
+| <% }; %>                                                                                          |
+-----------------------------------------------------------------------------------------------------
+
+-> review owner in review.js in router file :-
+
+----------------------------------------------------------------------------------------------------
+| //reviews - post                                                                                 |                  
+| router.post("/", validatereview, isLoggdIn, wrapAsync(async (req, res) => {                      |                                                                            
+|     let listing = await Listing.findById(req.params.id);                                         |                                                          
+|     let newreview = new Review(req.body.review);                                                 |                                                  
+|     newreview.author = req.user._id;                                                             |                                      
+|     console.log(newreview);                                                                      |                            
+|     console.log("this is a listing := ", listing);                                               |                                                    
+|                                                                                                  |  
+|     listing.reviews.push(newreview);                                                             |                                      
+|                                                                                                  |  
+|     await newreview.save().then(res => { console.log(res) }).catch(err => { console.log(err) }); |                                                                                                  
+|     await listing.save().catch(err => { console.log(err) });                                     |                                                              
+|                                                                                                  |  
+|     console.log("new review save!");                                                             |                                      
+|     req.flash("success", "New Review Created!");                                                 |                                                  
+|                                                                                                  |  
+|     res.redirect(`/listings/${req.params.id}`);                                                  |                                                
+| }));                                                                                             |      
+----------------------------------------------------------------------------------------------------
+
+-> For the nested populate we can use this type of formate.
+
+-----------------------------------------------------------------------------------------------------------------------------
+| const listing = await Listing.findById(id).populate({ path: "reviews", populate: { path: "author" } }).populate("owner"); |
+-----------------------------------------------------------------------------------------------------------------------------
+
+33. MVC := Model, View, Controller
+-------
+
+-> Implement Design Pattern for listings.
+-> it is a one type of Design Pattern or framwork.
+
+
+--> In Controller folder listing.js file.
+------------------------------------------------------------
+| const Listing = require("../models/listing");            |                                           
+|                                                          | 
+| module.exports.index = async (req, res, next) => {       |                                                 
+|     let allListings = await Listing.find();              |                                         
+|     res.render("./listings/index.ejs", { allListings }); |                                                       
+| };                                                       |
+------------------------------------------------------------
+
+--> In listing.js router file.
+-------------------------------------------------------------------
+| const listingController = require("../controllers/listing.js"); |
+| router.get("/", wrapAsync(listingController.index));            |
+-------------------------------------------------------------------
+
+34. router.route :=
+----------------
+
+-> A way to group together routes with different verbs but same paths.
+
+--> example of listing route and same for the review and user route.
+------------------------------------------------------------------------------------------------
+| router.route("/")                                                                            |                 
+|     .get(wrapAsync(listingController.index))                                                 |                                             
+|     .post(validatelisting, isLoggdIn, isOwner, wrapAsync(listingController.createListing));  |                                                                                           
+|                                                                                              | 
+| router.get("/new", isLoggdIn, wrapAsync(listingController.renderNewForm));                   |                                                                           
+|                                                                                              | 
+| router.route("/:id")                                                                         |                     
+|     .get(wrapAsync(listingController.showListing))                                           |                                                   
+|     .put(validatelisting, isLoggdIn, isOwner, wrapAsync(listingController.UpdateListing))    |                                                                                         
+|     .delete(isLoggdIn, isOwner, wrapAsync(listingController.destroyListing));                |                                                                             
+|                                                                                              | 
+| router.get("/:id/edit", isLoggdIn, wrapAsync(listingController.renderEditForm));             |                                                                                 
+|                                                                                              | 
+| module.exports = router;                                                                     |                         
+------------------------------------------------------------------------------------------------
+
