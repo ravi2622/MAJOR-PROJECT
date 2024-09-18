@@ -53,7 +53,11 @@ module.exports.createListing = async (req, res, next) => {
     //     throw new ExpressError(400, result.error);
     // }
 
+    let url = req.file.path;
+    let filename = req.file.filename;
+    console.log(url, "..", filename);
     let newListing = new Listing(req.body.listing);
+    newListing.image = { url, filename };
     newListing.owner = req.user._id;
 
     // if (!newListing.title) {

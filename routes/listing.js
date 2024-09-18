@@ -5,6 +5,9 @@ const { listSchema } = require("../schema.js");
 const ExpressError = require("../utils/ExpressError.js");
 const Listing = require("../models/listing.js");
 const { isLoggdIn, isOwner, validatelisting } = require("../middlewares.js");
+const multer = require('multer');
+const { storage } = require("../cloudConfig.js");
+const upload = multer({ storage });
 
 // const validatelisting = (req, res, next) => {
 //     let { error } = listSchema.validate(req.body);
@@ -153,7 +156,7 @@ const listingController = require("../controllers/listing.js");
 //--> Router.route form and Uper code is comment before this code and two time commint a normal callbacks
 router.route("/")
     .get(wrapAsync(listingController.index))
-    .post(validatelisting, isLoggdIn, isOwner, wrapAsync(listingController.createListing));
+    .post(isLoggdIn, upload.single("listing[image]"), validatelisting, wrapAsync(listingController.createListing));
 
 router.get("/new", isLoggdIn, wrapAsync(listingController.renderNewForm));
 

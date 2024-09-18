@@ -1,3 +1,7 @@
+if (process.env.NODE_ENV != "production") {
+    require('dotenv').config()
+}
+
 let express = require("express");
 let app = express();
 let port = 8080;
@@ -13,7 +17,7 @@ const { listSchema, reviewSchema } = require("./schema.js");
 const session = require("express-session");
 const flash = require("connect-flash");
 const passport = require("passport");
-const LocalStrategy = require("passport-local")
+const LocalStrategy = require("passport-local");
 
 const listingsRouter = require("./routes/listing.js");
 const reviewsRouter = require("./routes/review.js");

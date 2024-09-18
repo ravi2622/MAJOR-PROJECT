@@ -1022,3 +1022,92 @@ Ex :- SHA256
 | module.exports = router;                                                                     |                         
 ------------------------------------------------------------------------------------------------
 
+35. Image Uplode :=
+----------------
+
+--> Problem we have for file Uplode.
+      
+      i> we can not send files to the backend
+      ii> Size limit in mongoDB because the data save in the for of BSON and size is limited.
+
+--> How to Solve this problem.
+
+      i> form capable of sending files.
+      ii> we are not save files in Mongo But we are use 3rd party service (cloud) that can save files and give the link/URL of this saved file.
+      iii> Serve this link in mongoDB.
+
+=> Manipulating Form :=
+--------------------
+                                                                                                                      ----------------------------------------------------
+--> we are save send the data in the form of row to the backend and for the parsing the data we are use a middielware | app.use(express.urlencoded({ extended: true })); | for the parsing the data.
+                                                                                                                      ----------------------------------------------------
+--> for the parsing a data in the for of enctype="multipart/form-data" we are use a multer NPM package.
+-> enctype = "multipart/form-data"
+
+----------------------------------------------------------------
+| <div class="mb-3">                                           |              
+|   <lable for="image" class="form-label">Uplode Image</lable> |                                                        
+| </div>                                                       |  
+----------------------------------------------------------------
+
+=> NPM package multer :=
+---------------------
+
+-> Multer is a node.js middleware for handling multipart/form-data, which is primarily used for uploading files. It is written on top of busboy for maximum efficiency.
+
+----------------------------------------------------------------------------------------
+| NOTE: Multer will not process any form which is not multipart (multipart/form-data). |
+----------------------------------------------------------------------------------------
+
+-> in listing.js routes folder the parsing example of files and save image in local storage "/uplodes" folder.
+
+--------------------------------------------------------------------------------------------------
+| const multer  = require('multer');                                                             |                                     
+| const upload = multer({ dest: 'uploads/' });                                                   |                                               
+|                                                                                                |   
+| router.route("/")                                                                              |                   
+|     .get(wrapAsync(listingController.index))                                                   |                                               
+|     // .post(validatelisting, isLoggdIn, isOwner, wrapAsync(listingController.createListing)); |                                                                                                 
+|     .post(upload.single("listing[image]"), function (req, res) {                               |                                                                   
+|         res.send(req.file);                                                                    |                             
+|     });                                                                                        |         
+--------------------------------------------------------------------------------------------------
+
+36. Cloud SetUP :=
+---------------
+
+--> cloudinary & .env file
+
+-> npm package for the .env 
+      -> npm i dotenv
+
+
+37. Store File :=
+--------------
+
+--> Multer Store cloudinary
+
+-> npm i cloudinary 
+-> npm i multer-storage-cloudinary
+
+--> cloudConfig File for the config cloud and setup and storage setup in multer-storage-cloudinary.
+
+--> listing.js routing file.
+-------------------------------------------------------------------------------------------------
+| const multer = require('multer');                                                             |                                                                  
+| const { storage } = require("../cloudConfig.js");                                             |                                                                                    
+| const upload = multer({ storage });                                                           |                                                                        
+|                                                                                               |                                    
+| router.route("/")                                                                             |                                                      
+|     .get(wrapAsync(listingController.index))                                                  |                                                                              
+|     // .post(validatelisting, isLoggdIn, isOwner, wrapAsync(listingController.createListing));|                                                                                                                                    
+|     .post(upload.single("listing[image]"), function (req, res) {                              |                                                                                                      
+|         res.send(req.file.path);                                                              |                                                                  
+|     });                                                                                       |                                          
+-------------------------------------------------------------------------------------------------
+
+38. Save link in Mongo :=
+----------------------
+
+-> Modify image in Schema.
+
