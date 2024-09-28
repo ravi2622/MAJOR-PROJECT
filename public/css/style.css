@@ -176,3 +176,22 @@ body {
     padding-left: 0;
     padding-right: 0;
 }
+
+/* Map */
+
+#map {
+    height: 400px;
+    width: 80vh;
+}
+
+/* filter */
+
+/* #filters {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+#filter {
+    text-align: center;
+    margin-right: 2rem;
+} */

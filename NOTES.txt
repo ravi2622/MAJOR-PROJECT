@@ -1111,3 +1111,10 @@ Ex :- SHA256
 
 -> Modify image in Schema.
 
+39. Diploy Meant :=
+----------------
+
+==> Mongo Atlas :- cloud Database Service
+---------------
+
+mongodb+srv://ravi2622:Ravi@2622@cluster0.brkpl.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0

@@ -15,6 +15,7 @@ const wrapAsync = require("./utils/wrapAsync.js");
 const ExpressError = require("./utils/ExpressError.js");
 const { listSchema, reviewSchema } = require("./schema.js");
 const session = require("express-session");
+const MongoStore = require('connect-mongo');
 const flash = require("connect-flash");
 const passport = require("passport");
 const LocalStrategy = require("passport-local");
@@ -25,11 +26,16 @@ const userRouter = require("./routes/user.js");
 
 const mongoose = require('mongoose');
 
+const MONGODB_URL = "mongodb://127.0.0.1:27017/wanderlust";
+const DB_URL = process.env.ATLASDB_URL;
+
 main().then(res => console.log("Connecstion Successful"))
     .catch(err => console.log(err));
 
 async function main() {
-    await mongoose.connect('mongodb://127.0.0.1:27017/wanderlust');
+    // await mongoose.connect(MONGODB_URL);
+
+    await mongoose.connect(DB_URL);
 };
 
 app.engine("html", require("ejs").renderFile);
@@ -70,8 +76,21 @@ const validatereview = (req, res, next) => {
     }
 };
 
+const store = MongoStore.create({
+    mongoUrl: DB_URL,
+    crypto: {
+        secret: process.env.SECRET,
+    },
+    touchAfter: 24 * 3600
+});
+
+store.on("error", () => {
+    console.log("ERROR In MONGO SESSION STORE!", err);
+});
+
 const sesstionOpstion = {
-    secret: 'mysupersecretstring',
+    store,
+    secret: process.env.SECRET,
     resave: false,
     saveUninitialized: true,
     cookie: {
@@ -116,9 +135,9 @@ app.use((req, res, next) => {
 //     res.send(registeredUser);
 // });
 
-app.get("/", (req, res) => {
-    res.send("welcome to the wanderlust :)");
-});
+// app.get("/", (req, res) => {
+//     res.send("welcome to the wanderlust :)");
+// });
 
 app.use("/", userRouter);
 

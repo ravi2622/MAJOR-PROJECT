@@ -96,7 +96,11 @@ module.exports.renderEditForm = async (req, res) => {
         req.flash("error", "listing does not exsit!");
         res.redirect("/listings");
     } else {
-        res.render("./listings/edit.ejs", { listing });
+        let originalImageUrl = listing.image.url;
+        console.log(originalImageUrl);
+        originalImageUrl = originalImageUrl.replace("/upload", "/upload/h_300,w_250");
+        console.log(originalImageUrl);
+        res.render("./listings/edit.ejs", { listing, originalImageUrl });
     }
 
     // res.render("./listings/edit.ejs", { listing });
@@ -110,7 +114,14 @@ module.exports.UpdateListing = async (req, res, next) => {
     //     throw new ExpressError(400, "Send valid data for listing");
     // }
 
-    await Listing.findByIdAndUpdate(id, { ...req.body.listing });
+    let editList = await Listing.findByIdAndUpdate(id, { ...req.body.listing });
+
+    if (req.file !== "undefined") {
+        let url = req.file.path;
+        let filename = req.file.filename;
+        editList.image = { url, filename };
+        await editList.save();
+    }
 
     req.flash("success", "Successfuly Edit listing!");
 
